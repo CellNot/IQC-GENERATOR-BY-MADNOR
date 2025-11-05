@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPhone Chat Generator</title>
+<style>
+  * {box-sizing: border-box; font-family: 'Poppins', sans-serif;}
+  body {
+    background: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  h1 {
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1b1b1b;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s ease;
+  }
+
+  input:focus {
+    border-color: #fff;
+  }
+
+  button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.3s ease;
+  }
+
+  button:hover {
+    background: #e6e6e6;
+    transform: scale(1.03);
+  }
+
+  #result {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  #result img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #333;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  #footer {
+    margin-top: 40px;
+    font-size: 12px;
+    font-style: italic;
+    color: #aaa;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+  <h1>💬 iPhone Chat Generator</h1>
+
+  <div class="input-box">
+    <input id="msg" placeholder="Pesan..." />
+    <input id="time" placeholder="12:34" />
+    <input id="batt" placeholder="90" />
+    <input id="prov" placeholder="Telkomsel" />
+    <button id="genBtn">Generate</button>
+  </div>
+
+  <div id="result"></div>
+
+  <div id="footer">By mad</div>
+
+<script>
+const genBtn = document.getElementById('genBtn');
+const resultBox = document.getElementById('result');
+
+genBtn.addEventListener('click', async () => {
+  const msg = encodeURIComponent(document.getElementById('msg').value);
+  const time = encodeURIComponent(document.getElementById('time').value || '12:00');
+  const batt = encodeURIComponent(document.getElementById('batt').value || '80');
+  const prov = encodeURIComponent(document.getElementById('prov').value || 'Telkomsel');
+
+  if (!msg) return alert("Isi dulu pesan-nya!");
+
+  const url = `https://brat.siputzx.my.id/iphone-quoted?time=${time}&messageText=${msg}&carrierName=${prov}&batteryPercentage=${batt}&signalStrength=4&emojiStyle=apple&type=LITE`;
+
+  resultBox.innerHTML = `<p style="color:#ccc;">⏳ Sedang membuat gambar...</p>`;
+
+  const img = new Image();
+  img.src = url;
+  img.alt = "Result";
+  img.onload = () => {
+    img.classList.add('fade-in');
+    img.style.opacity = 1;
+
+    resultBox.innerHTML = "";
+    resultBox.appendChild(img);
+
+    // Tombol download baru muncul setelah gambar selesai dimuat
+    const dlBtn = document.createElement('button');
+    dlBtn.textContent = "Download";
+    resultBox.appendChild(dlBtn);
+
+    dlBtn.addEventListener('click', async () => {
+      try {
+        dlBtn.textContent = "Downloading...";
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = "chat_iphone.png";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+        dlBtn.textContent = "Download";
+      } catch (err) {
+        alert("Gagal mengunduh gambar 😢");
+        console.error(err);
+        dlBtn.textContent = "Download";
+      }
+    });
+  };
+
+  img.onerror = () => {
+    resultBox.innerHTML = `<p style="color:red;">❌ Gagal memuat gambar.</p>`;
+  };
+});
+</script>
+
+</body>
+</html>
